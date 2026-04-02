@@ -1,391 +1,178 @@
-# DeviceAI Runtime
+<p align="center">
+<img width="400" height="400" alt="hf_20260309_045718_0a075c8b-05d0-4610-8f94-1dfe0136d849" src="https://github.com/BitbeamAi/Bitbeam/blob/main/bitbeam-removebg-preview.png" />
 
-**On-device AI runtime for Kotlin, iOS, Flutter, and React Native. Ship speech recognition, synthesis, and LLM inference on Android, iOS, and Desktop — no cloud required, no latency, no privacy risk.**
+<div align="center">
 
-[![Build](https://github.com/deviceai-labs/deviceai/actions/workflows/ci.yml/badge.svg)](https://github.com/deviceai-labs/deviceai/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
-[![Maven Central](https://img.shields.io/maven-central/v/dev.deviceai/speech)](https://central.sonatype.com/artifact/dev.deviceai/speech)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.2-blueviolet?logo=kotlin)](https://kotlinlang.org)
-[![KMP](https://img.shields.io/badge/Kotlin_Multiplatform-Android%20%7C%20iOS%20%7C%20Desktop-blue)](https://www.jetbrains.com/kotlin-multiplatform/)
+# Bitbeam
 
----
+**Crypto-native AI workspace for traders, builders, teams, and developers**
 
-## What's available
+[![Web App](https://img.shields.io/badge/Web%20App-Open-3b82f6?style=for-the-badge&logo=googlechrome&logoColor=white)](https://твоя-web-app-ссылка)
+[![Telegram Mini App](https://img.shields.io/badge/Telegram%20Mini%20App-Launch-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/твой_мини_апп)
+[![Docs](https://img.shields.io/badge/Docs-Read-8b5cf6?style=for-the-badge&logo=readthedocs&logoColor=white)](https://твои-docs-ссылка)
+[![X.com](https://img.shields.io/badge/X.com-Follow-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/твой_аккаунт)
+[![Telegram Community](https://img.shields.io/badge/Telegram%20Community-Join-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/твоя_группа_или_канал)
 
-| Module | Language | Distribution | Status |
-|--------|----------|--------------|--------|
-| `kotlin/core` | Kotlin (Android + KMP) | Maven Central `dev.deviceai:core` | ✅ Available |
-| `kotlin/speech` | Kotlin (Android + KMP) | Maven Central `dev.deviceai:speech` | ✅ Available |
-| `kotlin/llm` | Kotlin (Android + KMP) | Maven Central `dev.deviceai:llm` | ✅ Available |
-| `ios/speech` | Swift | Swift Package Index | 🗓 Planned |
-| `flutter/speech` | Dart | pub.dev `deviceai_speech` | 🗓 Planned |
-| `react-native/speech` | TypeScript | npm `react-native-deviceai-speech` | 🗓 Planned |
-
-Each SDK is **independent and native to its platform** — they all call the same C++ engines (whisper.cpp, sherpa-onnx, llama.cpp) directly, with no cross-language bridging.
+</div>
 
 ---
 
-## Repository structure
+> [!IMPORTANT]
+> Bitbeam is not a black box, not a custodian, and not an auto-trading system  
+> You see the data, the logic, and the limits — and you decide what to do
 
-```
-deviceai/
-├── kotlin/
-│   ├── core/       dev.deviceai:core    ✅  model management, storage, logging
-│   ├── speech/     dev.deviceai:speech  ✅  STT (Whisper) + TTS (sherpa-onnx) + VAD
-│   └── llm/        dev.deviceai:llm     ✅  LLM inference via llama.cpp + offline RAG
-├── ios/
-│   └── speech/     Swift Package            🗓  Swift async/await wrapper
-├── flutter/
-│   └── speech/     pub.dev: deviceai_speech 🗓  Flutter plugin
-├── react-native/
-│   └── speech/     npm: react-native-deviceai-speech  🗓  TurboModule
-└── samples/
-    ├── composeApp/ Compose Multiplatform demo  ✅
-    └── iosApp/     native iOS shell            ✅
-```
+## Overview
+
+Bitbeam is a crypto-native AI platform that turns on-chain data into clear insights and actionable workflows inside a single workspace
+
+It connects wallets, tokens, projects, and live signals into one system where you can understand what is happening and react with confidence
 
 ---
 
-## Integration — Kotlin (Android, KMP, Desktop)
+## Why This Exists
 
-### Step 1 — Add dependencies
+Most crypto tools fail in one of two ways:
 
-```kotlin
-// build.gradle.kts
-implementation("dev.deviceai:core:0.2.0-alpha02")
-implementation("dev.deviceai:speech:0.2.0-alpha02")   // STT + TTS + VAD
-implementation("dev.deviceai:llm:0.2.0-alpha02")      // LLM inference + RAG
-```
+| Problem | Reality |
+|---|---|
+| Too much raw data | Users drown in charts, addresses, and noise |
+| Too much abstraction | Black-box bots hide logic and remove control |
 
-No extra repository config needed — all artifacts are on Maven Central.
+Bitbeam is built to fix both
 
----
-
-### Step 2 — Initialize the SDK
-
-Call `DeviceAI.initialize()` **once** at app startup before using any module.
-
-#### Android
-
-```kotlin
-import dev.deviceai.core.DeviceAI
-import dev.deviceai.core.Environment
-import dev.deviceai.models.PlatformStorage
-
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        PlatformStorage.initialize(this)
-        DeviceAI.initialize(context = this) {
-            environment = Environment.Development
-        }
-        setContent { App() }
-    }
-}
-```
-
-#### iOS (Kotlin side of a KMP project)
-
-```kotlin
-import dev.deviceai.core.DeviceAI
-import dev.deviceai.core.Environment
-
-private val sdkInit by lazy {
-    DeviceAI.initialize { environment = Environment.Development }
-}
-
-fun MainViewController(): UIViewController {
-    sdkInit
-    return ComposeUIViewController { App() }
-}
-```
-
-#### Desktop
-
-```kotlin
-import dev.deviceai.core.DeviceAI
-import dev.deviceai.core.Environment
-
-fun main() = application {
-    DeviceAI.initialize { environment = Environment.Development }
-    Window(onCloseRequest = ::exitApplication, title = "My App") { App() }
-}
-```
-
-#### With cloud backend (Staging / Production)
-
-```kotlin
-DeviceAI.initialize(context = this, apiKey = "dai_live_...") {
-    environment   = Environment.Production
-    telemetry     = Telemetry.Enabled
-    appVersion    = BuildConfig.VERSION_NAME
-    appAttributes = mapOf("user_tier" to "premium")
-}
-```
+> [!TIP]
+> You get structured data + AI explanations  
+> Not noise, not blind automation
 
 ---
 
-### Step 3 — Download a model
+## What Makes It Different
 
-`ModelRegistry` fetches the catalog from HuggingFace and downloads models to local storage. Downloads are resumable on interruption.
+| Area | Bitbeam Approach |
+|---|---|
+| Data | Unified metrics layer across wallets, tokens, and projects |
+| AI | Explains what is happening instead of replacing decision-making |
+| Control | No automatic execution without user intent |
+| Architecture | Same data layer for UI, API, agents, and alerts |
+| Usage | Composable: use only what you need |
 
-```kotlin
-import dev.deviceai.models.ModelRegistry
-
-val model = ModelRegistry.getOrDownload("ggml-tiny.en.bin") { progress ->
-    println("${progress.percentComplete.toInt()}% — ${progress.bytesDownloaded / 1_000_000}MB")
-}
-```
-
-> **whisper-tiny.en** (75 MB) runs 7× faster than real-time on mid-range Android hardware.
-
----
-
-### Step 4 — Transcribe speech
-
-```kotlin
-import dev.deviceai.SpeechBridge
-import dev.deviceai.SttConfig
-
-SpeechBridge.initStt(model.modelPath, SttConfig(language = "en", useGpu = true))
-
-val text: String = SpeechBridge.transcribeAudio(samples) // FloatArray, 16kHz mono PCM
-// or
-val text: String = SpeechBridge.transcribe("/path/to/audio.wav")
-
-SpeechBridge.shutdownStt()
-```
+> [!NOTE]
+> Bitbeam does not move funds, access private keys, or act on your behalf
 
 ---
 
-### Step 5 — Synthesize speech (optional)
+## Product Preview
 
-```kotlin
-import dev.deviceai.SpeechBridge
-import dev.deviceai.TtsConfig
-
-SpeechBridge.initTts(
-    modelPath  = voice.modelPath,
-    tokensPath = voice.tokensPath,
-    config     = TtsConfig(speechRate = 1.0f)
-)
-
-val pcm: ShortArray = SpeechBridge.synthesize("Hello from DeviceAI.")
-// Play with AudioTrack (Android), AVAudioEngine (iOS), or javax.sound (Desktop)
-
-SpeechBridge.shutdownTts()
-```
+| Surface | What You See |
+|---|---|
+| Portfolio | Positions, PnL, exposure, concentration |
+| Token View | Volume, holders, flows, behavior shifts |
+| Wallet View | Activity, counterparties, patterns |
+| Project Workspace | Token, treasury, holder monitoring |
+| Feed | Real-time events and AI summaries |
+| Agents | Risk hints, narratives, alerts |
 
 ---
 
-### Step 6 — Run a local LLM
+## Real Features
 
-```kotlin
-import dev.deviceai.core.DeviceAI
-import dev.deviceai.llm.llm
+| Category | Features |
+|---|---|
+| Wallet Intelligence | Multi-wallet tracking, balances, transaction history |
+| Portfolio Layer | Positions, PnL, exposure analysis |
+| Token Analytics | Volume, holders, concentration, whale activity |
+| Alerts | Wallet, token, and project alerts |
+| AI Agents | Narratives, risk detection, change summaries |
+| Automation | Webhooks, event triggers, external workflows |
+| Team Layer | Roles, shared dashboards, project views |
+| Developer Access | API, SDKs, agent execution |
 
-// Create a chat session — model loads once, history is automatic
-val session = DeviceAI.llm.chat("/path/to/model.gguf") {
-    systemPrompt = "You are a helpful assistant."
-    maxTokens    = 512
-    temperature  = 0.7f
-    useGpu       = true
-}
-
-// Streaming (recommended for UI)
-session.send("What is Kotlin Multiplatform?")
-    .collect { token -> print(token) }
-
-// Multi-turn — history managed automatically
-session.send("Give me a code example.").collect { print(it) }
-
-// Blocking (scripts / tests)
-val reply = session.sendBlocking("Summarise in one line.")
-
-// Lifecycle
-session.cancel()       // abort in-progress generation
-session.clearHistory() // fresh conversation, model stays loaded
-session.close()        // unload model, free resources
-```
+> [!IMPORTANT]
+> Agents only observe, analyze, and notify  
+> They never execute transactions or control funds
 
 ---
 
-### Step 7 — Offline RAG (optional)
+## Integrations
 
-Attach a `BM25RagStore` to inject local documents as context — no embedding model required.
-
-```kotlin
-import dev.deviceai.llm.rag.BM25RagStore
-
-val store = BM25RagStore(rawChunks = listOf(
-    "DeviceAI supports Android, iOS, and Desktop.",
-    "LLM inference uses llama.cpp with Metal on Apple Silicon."
-))
-
-val session = DeviceAI.llm.chat("/path/to/model.gguf") {
-    ragStore = store
-}
-
-session.send("Which platforms does DeviceAI support?").collect { print(it) }
-```
+| Type | Supported |
+|---|---|
+| Messaging | Telegram, Discord, Email |
+| Automation | Webhooks, n8n, custom systems |
+| Dev Stack | HTTP API, TypeScript SDK, Python SDK |
+| Data | Export to BI tools, warehouses, scripts |
 
 ---
 
-## Environments
+## Getting Started
 
-| Environment | API key | Backend | Log level | Use for |
-|-------------|---------|---------|-----------|---------|
-| `Development` | not required | none — local model path | DEBUG | local dev, unit tests |
-| `Staging` | required | staging.api.deviceai.dev | DEBUG | pre-release QA |
-| `Production` | required | api.deviceai.dev | WARN | release builds |
+### 1. Connect
 
----
+- Open Bitbeam
+- Connect your wallet
+- Allow read access
 
-## Architecture
+### 2. Observe
 
-```
-Your App
-    │
-    ▼
-DeviceAI.initialize(context, apiKey) { environment = Environment.Development }
-    │
-    ├── kotlin/core   (dev.deviceai:core)
-    │       DeviceAI           — unified SDK entry point
-    │       CoreSDKLogger       — structured, environment-aware logging
-    │       ModelRegistry       — model discovery, download, local management
-    │       PlatformStorage     — cross-platform file I/O
-    │
-    ├── kotlin/speech  (dev.deviceai:speech)
-    │       SpeechBridge        — unified STT + TTS Kotlin API
-    │           │
-    │           ├── Android / Desktop  →  JNI → libdeviceai_speech_jni.so/.dylib
-    │           └── iOS  →  C Interop → libspeech_merged.a
-    │                           ├── whisper.cpp   (STT)
-    │                           └── sherpa-onnx   (TTS + VAD)
-    │
-    └── kotlin/llm  (dev.deviceai:llm)
-            DeviceAI.llm.chat()   — creates a ChatSession
-            ChatSession            — stateful conversation, streaming Flow<String>
-            BM25RagStore           — offline retrieval-augmented generation
-                │
-                ├── Android / Desktop  →  JNI → libdeviceai_llm_jni.so/.dylib
-                └── iOS  →  C Interop → libllm_merged.a
-                                └── llama.cpp (Metal + CoreML)
-```
+- View portfolio, tokens, or wallets
+- Check exposure and flows
+
+### 3. Ask AI
+
+- “What changed?”
+- “Where is risk?”
+- “What matters?”
+
+### 4. Act
+
+- Set alerts
+- Adjust positions
+- Trigger workflows externally
+
+> [!CAUTION]
+> Always verify domain before connecting your wallet
 
 ---
 
-## Features
+## How It Works
 
-| Feature | Status |
-|---------|--------|
-| Speech-to-Text (Whisper) | ✅ Android, iOS, Desktop |
-| Text-to-Speech (sherpa-onnx VITS / Kokoro) | ✅ Android, iOS, Desktop |
-| Voice Activity Detection (Silero VAD) | ✅ Android, iOS, Desktop |
-| LLM inference (llama.cpp) | ✅ Android, iOS, Desktop |
-| Offline RAG (BM25) | ✅ Android, iOS, Desktop |
-| Streaming LLM generation (`Flow<String>`) | ✅ Android, iOS, Desktop |
-| Stateful `ChatSession` with auto history | ✅ |
-| Auto model download (HuggingFace) | ✅ |
-| GPU acceleration (Metal / Vulkan) | ✅ |
-| Cloud backend — OTA models, telemetry | 🚧 In progress |
-| Swift SDK | 🗓 Planned |
-| Flutter plugin | 🗓 Planned |
-| React Native module | 🗓 Planned |
-| Tool calling / voice agents | 🗓 Planned |
+Instead of showing raw flows and charts, Bitbeam builds a structured layer between blockchain data and your decisions
 
----
+### System Flow
 
-## Models
+| Step | What Happens | What You Get |
+|---|---|---|
+| Input | Wallets, tokens, contracts, and events are connected | Raw on-chain and contextual signals |
+| Structuring | Data is normalized into a unified metrics layer | Clean, consistent data across UI and API |
+| Interpretation | AI agents analyze patterns and changes | Narratives, risk hints, and summaries |
+| Output | Signals are delivered via UI, alerts, or API | Clear understanding of what matters |
+| Action | You decide to react or automate externally | Full control with no hidden execution |
 
-### Whisper (STT)
+> [!TIP]
+> Bitbeam doesn’t replace your decision-making  
+> It compresses time between signal → understanding → action
 
-| Model | Size | Speed | Best for |
-|-------|------|-------|----------|
-| `ggml-tiny.en.bin` | 75 MB | 7× real-time | English, mobile-first |
-| `ggml-base.bin` | 142 MB | Fast | Multilingual, balanced |
-| `ggml-small.bin` | 466 MB | Medium | Higher accuracy |
+### Interaction Model
 
-### LLM (GGUF via llama.cpp)
+- You connect data sources  
+- Bitbeam builds context  
+- AI explains what changed  
+- You choose what to do next  
 
-| Model | Size | Best for |
-|-------|------|----------|
-| SmolLM2-360M-Instruct (Q4) | ~220 MB | Fastest, mobile-first |
-| SmolLM2-1.7B-Instruct (Q4) | ~1 GB | Balanced |
-| Qwen2.5-0.5B-Instruct (Q4) | ~400 MB | Multilingual, compact |
-| Llama-3.2-1B-Instruct (Q4) | ~700 MB | Strong reasoning |
-
-Browse all available models via `LlmCatalog`.
+> [!IMPORTANT]
+> Every output in Bitbeam is grounded in the same underlying data layer  
+> No hidden logic, no black-box execution
 
 ---
 
-## Platform support
+## Disclaimer
 
-| Platform | STT | TTS | LLM | Sample App |
-|----------|-----|-----|-----|------------|
-| Android (API 26+) | ✅ | ✅ | ✅ | ✅ |
-| iOS 17+ | ✅ | ✅ | ✅ | ✅ |
-| macOS Desktop | ✅ | ✅ | ✅ | ✅ |
+> [!WARNING]
+> Bitbeam is not financial, legal, or tax advice  
+> It does not guarantee profit or prevent loss
 
----
+> [!NOTE]
+> You are responsible for all decisions, transactions, and risk management
 
-## Benchmarks
-
-| Device | Chip | Model | Audio | Inference | RTF |
-|--------|------|-------|-------|-----------|-----|
-| Redmi Note 9 Pro | Snapdragon 720G | whisper-tiny | 5.4s | 746ms | **0.14x** |
-
-> RTF < 1.0 = faster than real-time. 0.14x = ~7× faster than real-time on a mid-range Android phone.
-
----
-
-## Building from source
-
-**Prerequisites:** CMake 3.22+, Android NDK r26+, Xcode 26+ (iOS), Kotlin 2.2+
-
-```bash
-git clone --recursive https://github.com/deviceai-labs/deviceai.git
-cd deviceai
-
-# Compile checks
-./gradlew :kotlin:core:compileKotlinJvm
-./gradlew :kotlin:speech:compileKotlinJvm
-./gradlew :kotlin:llm:compileKotlinJvm
-
-# Run the desktop sample
-./gradlew :samples:composeApp:run
-```
-
----
-
-## Roadmap
-
-- [x] Kotlin SDK — speech, LLM, RAG, streaming
-- [x] `DeviceAI` unified entry point with `Environment` + `CloudConfig` DSL
-- [x] `ChatSession` — stateful multi-turn LLM conversations
-- [ ] Backend integration — device registration, OTA model assignment, telemetry
-- [ ] Swift SDK — native iOS/macOS package
-- [ ] Flutter SDK
-- [ ] React Native SDK
-- [ ] Tool calling / voice agents (`DeviceAI.agent`)
-
----
-
-## Sample App
-
-`samples/composeApp/` is a working Compose Multiplatform demo. Runs on Android, iOS, and Desktop.
-
-```bash
-# Desktop
-./gradlew :samples:composeApp:run
-
-# Android — open in Android Studio and run on device/emulator
-
-# iOS — open samples/iosApp/iosApp.xcodeproj in Xcode and run
-```
-
----
-
-## Contributing
-
-Issues and PRs welcome. Platform wrapper contributions (`ios/`, `flutter/`, `react-native/`) are especially welcome — each stub directory contains a README with the expected API surface.
+> [!IMPORTANT]
+> Bitbeam is an intelligence layer — not an execution engine
