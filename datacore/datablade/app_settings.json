@@ -1,0 +1,18 @@
+{
+  "projectName": "core_lab",
+  "environment": "development",
+
+  "logging": {
+    "level": "debug",
+    "destinations": ["console", "file"],
+    "filePath": "./logs/core_lab.log",
+    "maxFileSizeMb": 10,
+    "rotate": true
+  },
+
+  "features": {
+    "enableDiagnostics": true,
+    "enableRealTimeAlerts": false,
+    "experimentalMode": false
+  }
+}

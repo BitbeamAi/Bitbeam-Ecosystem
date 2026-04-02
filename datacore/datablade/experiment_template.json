@@ -1,0 +1,20 @@
+{
+  "experimentId": "exp_001",
+  "createdAt": "2025-09-12T12:00:00Z",
+  "description": "Volatility test for SOL token over a 60-minute window",
+  "parameters": {
+    "tokenSymbol": "SOL",
+    "analysisWindowMinutes": 60,
+    "volatilityThreshold": 0.05,
+    "liquidityThresholdUsd": 100000,
+    "flagsEnabled": true
+  },
+  "status": "draft",
+  "results": {
+    "riskScore": null,
+    "eventsDetected": [],
+    "summary": ""
+  },
+  "notes": "",
+  "tags": []
+}
